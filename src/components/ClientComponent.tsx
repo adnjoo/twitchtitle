@@ -100,7 +100,7 @@ export function ClientComponent({ id }: { id: string }) {
         }
 
         if (existingTitles && existingTitles.length > 0) {
-          setUpdateMessage("Title already exists. No duplicates allowed.");
+          // setUpdateMessage("Title already exists. No duplicates allowed.");
           return;
         }
 
