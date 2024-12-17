@@ -13,7 +13,6 @@ export function ClientComponent({ id }: { id: string }) {
   const [streamTitle, setStreamTitle] = useState<string>("");
   const [currentTitle, setCurrentTitle] = useState<string>("");
   const [updateMessage, setUpdateMessage] = useState<string>("");
-
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
 
   // Fetch previous titles from Supabase
@@ -42,7 +41,7 @@ export function ClientComponent({ id }: { id: string }) {
           setTokenData(data);
           fetchStreamTitle(data.access_token);
         })
-        .catch((err) => {
+        .catch(() => {
           setError("Failed to retrieve token");
         });
     }
@@ -107,6 +106,25 @@ export function ClientComponent({ id }: { id: string }) {
       });
   };
 
+  // Function to delete a title
+  const deleteTitle = async (titleToDelete: string) => {
+    setUpdateMessage(""); // Clear previous messages
+    const { error } = await supabase
+      .from("stream_titles")
+      .delete()
+      .match({ user_id: id, title: titleToDelete });
+
+    if (error) {
+      console.error("Error deleting title:", error);
+      setError("Failed to delete title");
+    } else {
+      setPreviousTitles((prev) =>
+        prev.filter((title) => title !== titleToDelete)
+      );
+      setUpdateMessage("Title successfully deleted!");
+    }
+  };
+
   // Twitch OAuth URL
   const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
       ?response_type=code
@@ -153,10 +171,20 @@ export function ClientComponent({ id }: { id: string }) {
                 previousTitles.map((title, index) => (
                   <li
                     key={index}
-                    className="mb-1 cursor-pointer text-blue-600 hover:underline"
-                    onClick={() => setStreamTitle(title)} // Set selected title to input
+                    className="mb-2 flex justify-between items-center"
                   >
-                    {title}
+                    <span
+                      className="cursor-pointer text-blue-600 hover:underline"
+                      onClick={() => setStreamTitle(title)}
+                    >
+                      {title}
+                    </span>
+                    <button
+                      onClick={() => deleteTitle(title)}
+                      className="ml-4 bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
                   </li>
                 ))
               ) : (
