@@ -67,7 +67,6 @@ export function ClientComponent({ id }: { id: string }) {
       });
   };
 
-  // Function to update the Twitch stream title
   const updateStreamTitle = () => {
     if (!tokenData?.access_token || !streamTitle) {
       setUpdateMessage("Missing access token or stream title");
@@ -85,9 +84,27 @@ export function ClientComponent({ id }: { id: string }) {
     })
       .then(async () => {
         setUpdateMessage("Stream title successfully updated!");
-        fetchStreamTitle(tokenData.access_token);
+        fetchStreamTitle(tokenData.access_token); // Refresh current title
 
-        // Save to Supabase
+        // Check for duplicates before inserting into Supabase
+        const { data: existingTitles, error: fetchError } = await supabase
+          .from("stream_titles")
+          .select("title")
+          .eq("user_id", id)
+          .eq("title", streamTitle);
+
+        if (fetchError) {
+          console.error("Error checking for duplicates:", fetchError);
+          setError("Failed to validate duplicate titles");
+          return;
+        }
+
+        if (existingTitles && existingTitles.length > 0) {
+          setUpdateMessage("Title already exists. No duplicates allowed.");
+          return;
+        }
+
+        // Save to Supabase if no duplicates
         const { error } = await supabase.from("stream_titles").insert([
           {
             user_id: id,
@@ -99,6 +116,7 @@ export function ClientComponent({ id }: { id: string }) {
           fetchPreviousTitles(); // Refresh previous titles
         } else {
           console.error("Error saving to Supabase:", error);
+          setError("Failed to save title");
         }
       })
       .catch(() => {
