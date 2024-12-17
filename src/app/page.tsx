@@ -15,7 +15,7 @@ export default async function Home() {
   const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
     ?response_type=code
     &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
-    &redirect_uri=http://localhost:3000
+    &redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}
     &scope=channel%3Amanage%3Abroadcast`.replace(/\s+/g, "");
 
   return (
