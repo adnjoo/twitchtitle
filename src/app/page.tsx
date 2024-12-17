@@ -9,15 +9,6 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log(user?.user_metadata.sub);
-
-  // Twitch OAuth URL
-  const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
-    ?response_type=code
-    &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
-    &redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}
-    &scope=channel%3Amanage%3Abroadcast`.replace(/\s+/g, "");
-
   return (
     <div className="flex flex-col items-center justify-items-center min-h-[80vh] p-8 pb-20 gap-16 sm:p-10">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -67,12 +58,6 @@ export default async function Home() {
             <h1 className="text-2xl font-semibold">
               Welcome, <span className="text-purple-600">{user.email}</span>!
             </h1>
-            <a
-              className="rounded-full border border-solid border-gray-300 dark:border-gray-700 transition-colors flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44 text-purple-600 font-bold"
-              href={twitchAuthUrl}
-            >
-              Connect with Twitch
-            </a>
           </>
         )}
       </main>
