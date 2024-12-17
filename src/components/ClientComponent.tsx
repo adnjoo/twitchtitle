@@ -162,7 +162,7 @@ export function ClientComponent({ id }: { id: string }) {
             <strong>Current Stream Title:</strong>{" "}
             {currentTitle || "Loading..."}
           </p>
-          <div className="mt-4">
+          <div className="flex flex-col mt-4 gap-4">
             <input
               type="text"
               placeholder="Enter new stream title"
