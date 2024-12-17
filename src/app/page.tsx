@@ -14,14 +14,6 @@ export default async function Home() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         {!user ? (
           <>
-            {/* Logo */}
-            <Image
-              src="/wordmark.png"
-              alt="TwitchTitle logo"
-              width={180}
-              height={38}
-              priority
-            />
             {/* Introduction */}
             <h1 className="text-2xl font-bold text-center sm:text-left">
               Automate Your Twitch Stream Titles with{" "}
@@ -56,12 +48,12 @@ export default async function Home() {
         ) : (
           <>
             <h1 className="text-2xl font-semibold">
-              Welcome, <span className="text-purple-600">{user.email}</span>!
+              Welcome, <span className="text-purple-600">{user.user_metadata.name}</span>!
             </h1>
+            <ClientComponent id={user?.user_metadata.sub} />
           </>
         )}
       </main>
-      <ClientComponent id={user?.user_metadata.sub} />
     </div>
   );
 }
