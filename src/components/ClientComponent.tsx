@@ -2,14 +2,35 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 export function ClientComponent({ id }: { id: string }) {
   const searchParams = useSearchParams();
+  const supabase = createClient();
+
   const [tokenData, setTokenData] = useState<any>(null);
   const [error, setError] = useState<any>(null);
-  const [streamTitle, setStreamTitle] = useState<string>(""); // Stream title input state
-  const [currentTitle, setCurrentTitle] = useState<string>(""); // Current stream title state
+  const [streamTitle, setStreamTitle] = useState<string>("");
+  const [currentTitle, setCurrentTitle] = useState<string>("");
   const [updateMessage, setUpdateMessage] = useState<string>("");
+
+  const [previousTitles, setPreviousTitles] = useState<string[]>([]);
+
+  // Fetch previous titles from Supabase
+  const fetchPreviousTitles = async () => {
+    const { data, error } = await supabase
+      .from("stream_titles")
+      .select("title")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching previous titles:", error);
+      setError("Failed to load previous titles");
+    } else {
+      setPreviousTitles(data.map((entry: any) => entry.title));
+    }
+  };
 
   // Handle OAuth token retrieval
   useEffect(() => {
@@ -18,15 +39,14 @@ export function ClientComponent({ id }: { id: string }) {
       fetch(`/api/twitch/oauth?code=${code}`)
         .then((res) => res.json())
         .then((data) => {
-          console.log("Token response:", data);
           setTokenData(data);
-          fetchStreamTitle(data.access_token); // Fetch current title after getting the token
+          fetchStreamTitle(data.access_token);
         })
         .catch((err) => {
-          console.error("Error exchanging token:", err);
           setError("Failed to retrieve token");
         });
     }
+    fetchPreviousTitles(); // Fetch titles on component load
   }, [searchParams]);
 
   // Function to fetch the current stream title
@@ -41,11 +61,9 @@ export function ClientComponent({ id }: { id: string }) {
       .then((res) => res.json())
       .then((data) => {
         const title = data?.data?.[0]?.title || "No title found";
-        console.log("Current stream title:", title);
         setCurrentTitle(title);
       })
-      .catch((err) => {
-        console.error("Error fetching stream title:", err);
+      .catch(() => {
         setError("Failed to fetch current stream title");
       });
   };
@@ -66,14 +84,25 @@ export function ClientComponent({ id }: { id: string }) {
       },
       body: JSON.stringify({ title: streamTitle }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Stream title updated:", data);
+      .then(async () => {
         setUpdateMessage("Stream title successfully updated!");
-        fetchStreamTitle(tokenData.access_token); // Refresh current title after update
+        fetchStreamTitle(tokenData.access_token);
+
+        // Save to Supabase
+        const { error } = await supabase.from("stream_titles").insert([
+          {
+            user_id: id,
+            title: streamTitle,
+          },
+        ]);
+
+        if (!error) {
+          fetchPreviousTitles(); // Refresh previous titles
+        } else {
+          console.error("Error saving to Supabase:", error);
+        }
       })
-      .catch((err) => {
-        console.error("Error updating stream title:", err);
+      .catch(() => {
         setUpdateMessage("Failed to update stream title");
       });
   };
@@ -115,6 +144,26 @@ export function ClientComponent({ id }: { id: string }) {
           {updateMessage && (
             <p className="mt-2 text-green-600">{updateMessage}</p>
           )}
+
+          {/* Display Previous Titles */}
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold mb-2">Previous Titles</h2>
+            <ul className="list-disc list-inside bg-white p-4 rounded-lg border">
+              {previousTitles.length > 0 ? (
+                previousTitles.map((title, index) => (
+                  <li
+                    key={index}
+                    className="mb-1 cursor-pointer text-blue-600 hover:underline"
+                    onClick={() => setStreamTitle(title)} // Set selected title to input
+                  >
+                    {title}
+                  </li>
+                ))
+              ) : (
+                <p>No previous titles found.</p>
+              )}
+            </ul>
+          </div>
         </div>
       ) : (
         <a
