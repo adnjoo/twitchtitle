@@ -29,7 +29,8 @@ Automate and update your Twitch stream titles programmatically.
      ```
      NEXT_PUBLIC_TWITCH_CLIENT_ID=your_client_id
      TWITCH_CLIENT_SECRET=your_client_secret
-     NEXT_PUBLIC_REDIRECT_URI=http://localhost
+     NEXT_PUBLIC_SUPABASE_URL=..
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=..
      ```
 
 4. **Run the app**:
