@@ -3,6 +3,7 @@
   "plugins": ["unused-imports"],
   "rules": {
     "unused-imports/no-unused-imports": "error",
+    "@next/next/no-html-link-for-pages": "off",
     "unused-imports/no-unused-vars": [
       "warn",
       {

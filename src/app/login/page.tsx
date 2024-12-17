@@ -3,8 +3,6 @@
 import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
-  const redirectUrl = `${window.location.origin}/auth/callback`;
-  console.log("Redirecting to:", redirectUrl);
   // Function to sign in using Twitch OAuth
   async function signInWithTwitch() {
     const supabase = await createClient();
