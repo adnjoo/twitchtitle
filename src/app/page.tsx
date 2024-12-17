@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Github, Twitch, Webhook } from "lucide-react";
+import { Github, Twitch } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
+import { LogoutButton } from "../components/LogoutButton";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function Home() {
           {/* Logo */}
           <Image
             className=""
-            src="/logo.png"
+            src="/wordmark.png"
             alt="TwitchTitle logo"
             width={180}
             height={38}
@@ -41,7 +42,7 @@ export default async function Home() {
               <strong>TwitchTitle</strong>.
             </li>
             <li>
-              Use our API or Chrome extension to dynamically update your stream
+              Use the app to save and update your stream
               title.
             </li>
           </ol>
@@ -49,17 +50,10 @@ export default async function Home() {
           {/* Actions */}
           <div className="flex gap-4 items-center flex-col sm:flex-row">
             <a
-              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-purple-600 text-white gap-2 hover:bg-purple-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-              href="/api-docs"
-            >
-              <Webhook size={16} />
-              Explore API Docs
-            </a>
-            <a
               className="rounded-full border border-solid border-gray-300 dark:border-gray-700 transition-colors flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
               href="/login"
             >
-              Get Started
+              Login with Twitch
             </a>
           </div>
         </main>
@@ -90,10 +84,13 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
       <h1 className="text-2xl font-semibold">
         Welcome, <span className="text-purple-600">{user.email}</span>!
       </h1>
+      <div className="mt-12">
+        <LogoutButton />
+      </div>
     </div>
   );
 }
