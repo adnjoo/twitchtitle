@@ -3,9 +3,12 @@
 import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
+  const redirectUrl = `${window.location.origin}/auth/callback`;
+  console.log("Redirecting to:", redirectUrl);
   // Function to sign in using Twitch OAuth
   async function signInWithTwitch() {
     const supabase = await createClient();
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "twitch",
       options: {
@@ -22,8 +25,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+    <div className="flex flex-col items-center justify-center min-h-[80vh]">
+      <div className="p-6 rounded-lg shadow-lg text-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to TwitchTitle</h1>
         <p className="text-gray-400 mb-6">
           Log in with your Twitch account to get started.
