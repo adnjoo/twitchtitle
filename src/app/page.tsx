@@ -48,7 +48,7 @@ export default async function Home() {
         ) : (
           <>
             <h1 className="text-2xl font-semibold">
-              Welcome, <span className="text-purple-600">{user.email}</span>!
+              Welcome, <span className="text-purple-600">{user.user_metadata.name}</span>!
             </h1>
             <ClientComponent id={user?.user_metadata.sub} />
           </>
