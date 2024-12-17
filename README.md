@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# **TwitchTitle**
 
-## Getting Started
+Automate and update your Twitch stream titles programmatically.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## **Features**
+- Update your Twitch stream title dynamically.
+- Supports API and Chrome Extension workflows.
+- Integrates seamlessly with Twitch's API.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## **Setup**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/adnjoo/twitchtitle.git
+   cd twitchtitle
+   ```
 
-## Learn More
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Set up environment variables**:
+   - Create a `.env` file and add the following:
+     ```
+     NEXT_PUBLIC_TWITCH_CLIENT_ID=your_client_id
+     TWITCH_CLIENT_SECRET=your_client_secret
+     NEXT_PUBLIC_REDIRECT_URI=http://localhost
+     ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Run the app**:
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## **Usage**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Visit the app in your browser: `http://localhost:3000`.
+2. Log in with your Twitch account.
+3. Use the provided tools to update your stream title programmatically.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## **Tech Stack**
+- **Next.js**
+- **Supabase** (for authentication)
+- **Twitch API**
+
+---
+
+## **License**
+This project is open-source under the [MIT License](LICENSE).
+
+---
+
+## **Contributing**
+Feel free to open issues or submit pull requests.
+
