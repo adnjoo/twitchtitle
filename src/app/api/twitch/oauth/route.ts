@@ -33,6 +33,8 @@ export async function GET() {
 
     const data = await response.json();
 
+    // const { access_token, expires_in, token_type } = data;
+
     return new Response(JSON.stringify(data), {
       headers: { "Content-Type": "application/json" },
       status: 200,
