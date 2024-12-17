@@ -34,7 +34,7 @@ export function ClientComponent({ id }: { id: string }) {
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Client-Id": process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || "",
       },
     })
@@ -60,7 +60,7 @@ export function ClientComponent({ id }: { id: string }) {
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
       method: "PATCH",
       headers: {
-        "Authorization": `Bearer ${tokenData.access_token}`,
+        Authorization: `Bearer ${tokenData.access_token}`,
         "Client-Id": process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || "",
         "Content-Type": "application/json",
       },
@@ -78,6 +78,13 @@ export function ClientComponent({ id }: { id: string }) {
       });
   };
 
+  // Twitch OAuth URL
+  const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
+      ?response_type=code
+      &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
+      &redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}
+      &scope=channel%3Amanage%3Abroadcast`.replace(/\s+/g, "");
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Twitch Stream Title Manager</h1>
@@ -86,11 +93,9 @@ export function ClientComponent({ id }: { id: string }) {
 
       {tokenData ? (
         <div className="p-4 bg-gray-100 rounded-lg">
-          <p>
-            <strong>Access Token:</strong> {tokenData.access_token}
-          </p>
           <p className="mt-2">
-            <strong>Current Stream Title:</strong> {currentTitle || "Loading..."}
+            <strong>Current Stream Title:</strong>{" "}
+            {currentTitle || "Loading..."}
           </p>
           <div className="mt-4">
             <input
@@ -107,10 +112,17 @@ export function ClientComponent({ id }: { id: string }) {
               Update Stream Title
             </button>
           </div>
-          {updateMessage && <p className="mt-2 text-green-600">{updateMessage}</p>}
+          {updateMessage && (
+            <p className="mt-2 text-green-600">{updateMessage}</p>
+          )}
         </div>
       ) : (
-        <p>Waiting for OAuth response...</p>
+        <a
+          className="rounded-full border border-solid border-gray-300 dark:border-gray-700 transition-colors flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44 text-purple-600 font-bold"
+          href={twitchAuthUrl}
+        >
+          Connect with Twitch
+        </a>
       )}
     </div>
   );
