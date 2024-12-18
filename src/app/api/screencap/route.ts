@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // import puppeteer from 'puppeteer-core'; // Use puppeteer-core for better compatibility with hosting platforms.
 import puppeteer from 'puppeteer';
 
+// TODO: only works locally
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get('url');
