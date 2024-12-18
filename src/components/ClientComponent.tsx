@@ -24,6 +24,7 @@ export function ClientComponent({
   const [currentTitle, setCurrentTitle] = useState<string>('');
   const [updateMessage, setUpdateMessage] = useState<string>('');
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
   // Fetch previous titles from Supabase
   const fetchPreviousTitles = async () => {
@@ -41,21 +42,23 @@ export function ClientComponent({
     }
   };
 
-  // Fetch the current stream title from the API route
-  const fetchStreamTitle = async () => {
+  // Fetch the current stream title and tags from the API route
+  const getChannels = async () => {
     if (!twitchAccessToken) return;
 
     try {
       const response = await fetch(
-        `/api/twitch/get-stream-title?broadcaster_id=${id}&access_token=${twitchAccessToken}`
+        `/api/twitch/channels?broadcaster_id=${id}&access_token=${twitchAccessToken}`
       );
       const data = await response.json();
+      console.log('data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch stream title');
       }
 
       setCurrentTitle(data.title || 'No title found');
+      setTags(data.tags || []);
     } catch (error) {
       console.error('Error fetching stream title:', error);
       setError('Failed to fetch current stream title');
@@ -64,7 +67,7 @@ export function ClientComponent({
 
   useEffect(() => {
     if (twitchAccessToken) {
-      fetchStreamTitle();
+      getChannels();
       fetchPreviousTitles();
     }
   }, [twitchAccessToken]);
@@ -106,7 +109,7 @@ export function ClientComponent({
           throw new Error('Failed to update stream title');
         }
         setUpdateMessage('Stream title successfully updated!');
-        fetchStreamTitle(); // Refresh current title
+        getChannels(); // Refresh current title
 
         if (!error) {
           fetchPreviousTitles(); // Refresh previous titles
@@ -139,6 +142,18 @@ export function ClientComponent({
             <strong>Current Stream Title:</strong>{' '}
             {currentTitle || 'Loading...'}
           </p>
+          <div className='mt-2'>
+            <strong>Tags:</strong>{' '}
+            {tags.length > 0 ? (
+              <ul className='list-disc pl-6'>
+                {tags.map((tag, index) => (
+                  <li key={index}>{tag}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No tags available</p>
+            )}
+          </div>
           <div className='mt-4 flex flex-col gap-4'>
             <input
               type='text'

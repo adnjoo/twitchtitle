@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
-import Footer from '@/src/components/Footer';
-import Navbar from '@/src/components/Nav';
+import Footer from '@/src/components/layout/Footer';
+import Navbar from '@/src/components/layout/Nav';
 import Providers from '@/src/utils/rq/queryClient';
 
 import './globals.css';

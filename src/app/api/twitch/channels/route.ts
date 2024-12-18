@@ -30,10 +30,13 @@ export async function GET(request: NextRequest) {
       throw new Error(`Failed to fetch stream title: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    const title = data?.data?.[0]?.title || 'No title found';
+    const { data } = await response.json();
 
-    return new NextResponse(JSON.stringify({ title }), {
+    console.log('Stream title data:', data[0].tags);
+    const title = data?.[0]?.title || 'No title found';
+    const tags = data?.[0]?.tags || [];
+
+    return new NextResponse(JSON.stringify({ title, tags }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

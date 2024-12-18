@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 import { createClient } from '@/src/utils/supabase/server';
 
-import { LogoutButton } from './LogoutButton';
+import { LogoutButton } from '../LogoutButton';
 import { MobileNav } from './MobileNav';
 
 export default async function Navbar() {
