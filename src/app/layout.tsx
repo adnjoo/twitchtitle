@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Navbar from "@/src/components/Nav";
-import Footer from "@/src/components/Footer";
-import Providers from "@/src/utils/rq/queryClient";
+import type { Metadata } from 'next';
+
+import Footer from '@/src/components/Footer';
+import Navbar from '@/src/components/Nav';
+import Providers from '@/src/utils/rq/queryClient';
+
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "TwitchTitle",
-  description: "Automate Your Twitch Stream Titles with TwitchTitle",
+  title: 'TwitchTitle',
+  description: 'Automate Your Twitch Stream Titles with TwitchTitle',
 };
 
 export default function RootLayout({
@@ -15,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
+    <html lang='en'>
+      <body className='antialiased'>
         <Providers>
           <Navbar />
           {children}

@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createClient } from "@/src/utils/supabase/client";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { createClient } from '@/src/utils/supabase/client';
 
 export function ClientComponent({ id }: { id: string }) {
   const searchParams = useSearchParams();
@@ -10,22 +11,22 @@ export function ClientComponent({ id }: { id: string }) {
 
   const [tokenData, setTokenData] = useState<any>(null);
   const [error, setError] = useState<any>(null);
-  const [streamTitle, setStreamTitle] = useState<string>("");
-  const [currentTitle, setCurrentTitle] = useState<string>("");
-  const [updateMessage, setUpdateMessage] = useState<string>("");
+  const [streamTitle, setStreamTitle] = useState<string>('');
+  const [currentTitle, setCurrentTitle] = useState<string>('');
+  const [updateMessage, setUpdateMessage] = useState<string>('');
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
 
   // Fetch previous titles from Supabase
   const fetchPreviousTitles = async () => {
     const { data, error } = await supabase
-      .from("stream_titles")
-      .select("title")
-      .eq("user_id", id)
-      .order("created_at", { ascending: false });
+      .from('stream_titles')
+      .select('title')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching previous titles:", error);
-      setError("Failed to load previous titles");
+      console.error('Error fetching previous titles:', error);
+      setError('Failed to load previous titles');
     } else {
       setPreviousTitles(data.map((entry: any) => entry.title));
     }
@@ -33,7 +34,7 @@ export function ClientComponent({ id }: { id: string }) {
 
   // Handle OAuth token retrieval
   useEffect(() => {
-    const code = searchParams.get("code");
+    const code = searchParams.get('code');
     if (code) {
       fetch(`/api/twitch/oauth?code=${code}`)
         .then((res) => res.json())
@@ -42,7 +43,7 @@ export function ClientComponent({ id }: { id: string }) {
           fetchStreamTitle(data.access_token);
         })
         .catch(() => {
-          setError("Failed to retrieve token");
+          setError('Failed to retrieve token');
         });
     }
     fetchPreviousTitles(); // Fetch titles on component load
@@ -51,51 +52,51 @@ export function ClientComponent({ id }: { id: string }) {
   // Function to fetch the current stream title
   const fetchStreamTitle = (accessToken: string) => {
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-Id": process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || "",
+        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
       },
     })
       .then((res) => res.json())
       .then((data) => {
-        const title = data?.data?.[0]?.title || "No title found";
+        const title = data?.data?.[0]?.title || 'No title found';
         setCurrentTitle(title);
       })
       .catch(() => {
-        setError("Failed to fetch current stream title");
+        setError('Failed to fetch current stream title');
       });
   };
 
   const updateStreamTitle = () => {
     if (!tokenData?.access_token || !streamTitle) {
-      setUpdateMessage("Missing access token or stream title");
+      setUpdateMessage('Missing access token or stream title');
       return;
     }
 
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
-        "Client-Id": process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || "",
-        "Content-Type": "application/json",
+        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ title: streamTitle }),
     })
       .then(async () => {
-        setUpdateMessage("Stream title successfully updated!");
+        setUpdateMessage('Stream title successfully updated!');
         fetchStreamTitle(tokenData.access_token); // Refresh current title
 
         // Check for duplicates before inserting into Supabase
         const { data: existingTitles, error: fetchError } = await supabase
-          .from("stream_titles")
-          .select("title")
-          .eq("user_id", id)
-          .eq("title", streamTitle);
+          .from('stream_titles')
+          .select('title')
+          .eq('user_id', id)
+          .eq('title', streamTitle);
 
         if (fetchError) {
-          console.error("Error checking for duplicates:", fetchError);
-          setError("Failed to validate duplicate titles");
+          console.error('Error checking for duplicates:', fetchError);
+          setError('Failed to validate duplicate titles');
           return;
         }
 
@@ -105,7 +106,7 @@ export function ClientComponent({ id }: { id: string }) {
         }
 
         // Save to Supabase if no duplicates
-        const { error } = await supabase.from("stream_titles").insert([
+        const { error } = await supabase.from('stream_titles').insert([
           {
             user_id: id,
             title: streamTitle,
@@ -115,31 +116,31 @@ export function ClientComponent({ id }: { id: string }) {
         if (!error) {
           fetchPreviousTitles(); // Refresh previous titles
         } else {
-          console.error("Error saving to Supabase:", error);
-          setError("Failed to save title");
+          console.error('Error saving to Supabase:', error);
+          setError('Failed to save title');
         }
       })
       .catch(() => {
-        setUpdateMessage("Failed to update stream title");
+        setUpdateMessage('Failed to update stream title');
       });
   };
 
   // Function to delete a title
   const deleteTitle = async (titleToDelete: string) => {
-    setUpdateMessage(""); // Clear previous messages
+    setUpdateMessage(''); // Clear previous messages
     const { error } = await supabase
-      .from("stream_titles")
+      .from('stream_titles')
       .delete()
       .match({ user_id: id, title: titleToDelete });
 
     if (error) {
-      console.error("Error deleting title:", error);
-      setError("Failed to delete title");
+      console.error('Error deleting title:', error);
+      setError('Failed to delete title');
     } else {
       setPreviousTitles((prev) =>
         prev.filter((title) => title !== titleToDelete)
       );
-      setUpdateMessage("Title successfully deleted!");
+      setUpdateMessage('Title successfully deleted!');
     }
   };
 
@@ -148,58 +149,58 @@ export function ClientComponent({ id }: { id: string }) {
       ?response_type=code
       &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
       &redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}
-      &scope=channel%3Amanage%3Abroadcast`.replace(/\s+/g, "");
+      &scope=channel%3Amanage%3Abroadcast`.replace(/\s+/g, '');
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Twitch Stream Title Manager</h1>
+    <div className='p-4'>
+      <h1 className='mb-4 text-2xl font-bold'>Twitch Stream Title Manager</h1>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className='text-red-500'>{error}</p>}
 
       {tokenData ? (
-        <div className="p-4 bg-gray-100 rounded-lg">
-          <p className="mt-2">
-            <strong>Current Stream Title:</strong>{" "}
-            {currentTitle || "Loading..."}
+        <div className='rounded-lg bg-gray-100 p-4'>
+          <p className='mt-2'>
+            <strong>Current Stream Title:</strong>{' '}
+            {currentTitle || 'Loading...'}
           </p>
-          <div className="flex flex-col mt-4 gap-4">
+          <div className='mt-4 flex flex-col gap-4'>
             <input
-              type="text"
-              placeholder="Enter new stream title"
+              type='text'
+              placeholder='Enter new stream title'
               value={streamTitle}
               onChange={(e) => setStreamTitle(e.target.value)}
-              className="border border-gray-300 p-2 rounded-lg mr-2"
+              className='mr-2 rounded-lg border border-gray-300 p-2'
             />
             <button
               onClick={updateStreamTitle}
-              className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"
+              className='rounded-lg bg-blue-500 p-2 text-white hover:bg-blue-600'
             >
               Update Stream Title
             </button>
           </div>
           {updateMessage && (
-            <p className="mt-2 text-green-600">{updateMessage}</p>
+            <p className='mt-2 text-green-600'>{updateMessage}</p>
           )}
 
           {/* Display Previous Titles */}
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-2">Previous Titles</h2>
-            <ul className="list-disc list-inside bg-white p-4 rounded-lg border">
+          <div className='mt-6'>
+            <h2 className='mb-2 text-xl font-semibold'>Previous Titles</h2>
+            <ul className='list-inside list-disc rounded-lg border bg-white p-4'>
               {previousTitles.length > 0 ? (
                 previousTitles.map((title, index) => (
                   <li
                     key={index}
-                    className="mb-2 flex justify-between items-center"
+                    className='mb-2 flex items-center justify-between'
                   >
                     <span
-                      className="cursor-pointer text-blue-600 hover:underline"
+                      className='cursor-pointer text-blue-600 hover:underline'
                       onClick={() => setStreamTitle(title)}
                     >
                       {title}
                     </span>
                     <button
                       onClick={() => deleteTitle(title)}
-                      className="ml-4 bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                      className='ml-4 rounded bg-red-500 p-1 text-white hover:bg-red-600'
                     >
                       Delete
                     </button>
@@ -213,7 +214,7 @@ export function ClientComponent({ id }: { id: string }) {
         </div>
       ) : (
         <a
-          className="rounded-full border border-solid border-gray-300 dark:border-gray-700 transition-colors flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44 text-purple-600 font-bold"
+          className='flex h-10 items-center justify-center rounded-full border border-solid border-gray-300 px-4 text-sm font-bold text-purple-600 transition-colors hover:border-transparent hover:bg-gray-100 sm:h-12 sm:min-w-44 sm:px-5 sm:text-base dark:border-gray-700 dark:hover:bg-gray-800'
           href={twitchAuthUrl}
         >
           Connect with Twitch

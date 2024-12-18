@@ -1,7 +1,7 @@
-import { User } from "@supabase/supabase-js";
-import { useQuery } from "@tanstack/react-query";
+import { User } from '@supabase/supabase-js';
+import { useQuery } from '@tanstack/react-query';
 
-import { supabase } from "@/src/utils/supabase/client";
+import { supabase } from '@/src/utils/supabase/client';
 
 /**
  * Custom React hook to retrieve the current authenticated user from Supabase.
@@ -16,7 +16,7 @@ import { supabase } from "@/src/utils/supabase/client";
  */
 export function useUser(): User | undefined {
   const { data: user } = useQuery({
-    queryKey: ["user"],
+    queryKey: ['user'],
     queryFn: async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) throw new Error(error.message);
