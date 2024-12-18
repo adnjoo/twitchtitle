@@ -6,7 +6,15 @@ import { useEffect, useState } from 'react';
 import { PreviousTitles } from '@/src/components/PreviousTitles';
 import { createClient } from '@/src/utils/supabase/client';
 
-export function ClientComponent({ id }: { id: string }) {
+export type ClientComponentProps = {
+  id: string;
+  twitchAccessToken?: string;
+};
+
+export function ClientComponent({
+  id,
+  twitchAccessToken,
+}: ClientComponentProps) {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -33,11 +41,18 @@ export function ClientComponent({ id }: { id: string }) {
     }
   };
 
+  useEffect(() => {
+    if (twitchAccessToken) {
+      setTokenData({ access_token: twitchAccessToken });
+      fetchStreamTitle(twitchAccessToken);
+    }
+  }, [twitchAccessToken]);
+
   // Handle OAuth token retrieval
   useEffect(() => {
     const code = searchParams.get('code');
     if (code) {
-      fetch(`/api/twitch/oauth?code=${code}`)
+      fetch(`/api/twitch/oauth?code=${code}&userId=${id}`)
         .then((res) => res.json())
         .then((data) => {
           setTokenData(data);

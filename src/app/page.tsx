@@ -1,8 +1,13 @@
+import { cookies } from 'next/headers';
+
 import { ClientComponent } from '@/src/components/ClientComponent';
 import { createClient } from '@/src/utils/supabase/server';
 
 export default async function Home() {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const twitch_access_token = cookieStore.get('twitch_access_token') as any;
+  // console.log('twitch_access_token:', twitch_access_token.value);
 
   const {
     data: { user },
@@ -51,7 +56,7 @@ export default async function Home() {
               <span className='text-purple-600'>{user.user_metadata.name}</span>
               !
             </h1>
-            <ClientComponent id={user?.user_metadata.sub} />
+            <ClientComponent id={user?.user_metadata.sub} twitchAccessToken={twitch_access_token.value} />
           </>
         )}
       </main>
