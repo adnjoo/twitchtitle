@@ -25,6 +25,8 @@ export function ClientComponent({
   const [updateMessage, setUpdateMessage] = useState<string>('');
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [gameName, setGameName] = useState<string>('');
+  const [broadcasterName, setBroadcasterName] = useState<string>('');
 
   // Fetch previous titles from Supabase
   const fetchPreviousTitles = async () => {
@@ -59,6 +61,8 @@ export function ClientComponent({
 
       setCurrentTitle(data.title || 'No title found');
       setTags(data.tags || []);
+      setGameName(data.game_name || 'No game found');
+      setBroadcasterName(data.broadcaster_name || 'No broadcaster found');
     } catch (error) {
       console.error('Error fetching stream title:', error);
       setError('Failed to fetch current stream title');
@@ -138,10 +142,14 @@ export function ClientComponent({
 
       {twitchAccessToken ? (
         <div className='rounded-lg bg-gray-100 p-4'>
-          <p className='mt-2'>
-            <strong>Current Stream Title:</strong>{' '}
+          <a
+            className='mt-2 underline'
+            target='_blank'
+            href={`https://twitch.com/${broadcasterName}`}
+          >
             {currentTitle || 'Loading...'}
-          </p>
+          </a>
+          <p>{gameName || 'Loading...'}</p>
           <div className='mt-2'>
             <strong>Tags:</strong>{' '}
             {tags.length > 0 ? (
@@ -172,7 +180,6 @@ export function ClientComponent({
           {updateMessage && (
             <p className='mt-2 text-green-600'>{updateMessage}</p>
           )}
-
           <PreviousTitles
             setStreamTitle={setStreamTitle}
             previousTitles={previousTitles}
