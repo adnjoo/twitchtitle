@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 export default function BlogPage() {
@@ -12,9 +13,12 @@ export default function BlogPage() {
           articles. Stay informed and inspired with our curated content.
         </p>
         <div className='mt-10 text-center'>
-          <button className='rounded-full bg-blue-600 px-6 py-2 text-white hover:bg-blue-700'>
+          <Link
+            href='/blog/getting-started'
+            className='rounded-full bg-blue-600 px-6 py-2 text-white hover:bg-blue-700'
+          >
             Explore Articles
-          </button>
+          </Link>
         </div>
       </div>
     </div>
