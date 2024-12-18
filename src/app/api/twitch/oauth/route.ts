@@ -1,11 +1,17 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { createClient } from '@/src/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
   const searchParams = request.nextUrl.searchParams;
-  const code = searchParams.get('code') as string;
+  const code = searchParams.get('code');
+  const userId = searchParams.get('user_id'); // Pass the user ID as a query parameter
 
-  if (!code) {
-    throw new Error('Missing code parameter');
+  if (!code || !userId) {
+    return new NextResponse('Missing code or user_id parameter', {
+      status: 400,
+    });
   }
 
   try {
@@ -15,31 +21,61 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID as string, // Replace with your client ID
-        client_secret: process.env.TWITCH_CLIENT_SECRET as string, // Replace with your client secret
-        code: code,
+        client_id: process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID!,
+        client_secret: process.env.TWITCH_CLIENT_SECRET!,
+        code,
         grant_type: 'authorization_code',
-        redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI as string, // Replace with your redirect URI
+        redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI!,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
+      const errorDetails = await response.json();
+      console.error('Twitch token exchange failed:', errorDetails);
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Token exchange failed',
+          details: errorDetails,
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    const data = await response.json();
+    const { access_token, refresh_token, expires_in } = await response.json();
 
-    console.log('Token exchange response:', data);
-    // Respond with the access token data
-    return new Response(JSON.stringify(data), {
-      headers: {
-        'Content-Type': 'application/json',
+    // Convert Unix timestamp to ISO string
+    const expires_at = new Date(Date.now() + expires_in * 1000).toISOString();
+
+    // Save tokens to Supabase
+    const { error } = await supabase.from('user_tokens').upsert(
+      {
+        user_id: userId,
+        access_token,
+        refresh_token,
+        expires_at, // Store expiry as a timestamp
       },
+      { onConflict: 'user_id' }
+    );
+
+    if (error) {
+      console.error('Failed to save tokens in Supabase:', error);
+      return new NextResponse('Failed to save tokens', { status: 500 });
+    }
+
+    // Set access token as a secure HTTP-only cookie
+    const res = new NextResponse(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' },
     });
+
+    res.cookies.set('twitch_access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: expires_in,
+    });
+
+    return res;
   } catch (error) {
     console.error('Token exchange error:', error);
-    return new Response('Token exchange error', {
-      status: 500,
-    });
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

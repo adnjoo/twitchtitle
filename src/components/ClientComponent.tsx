@@ -36,11 +36,11 @@ export function ClientComponent({ id }: { id: string }) {
   useEffect(() => {
     const code = searchParams.get('code');
     if (code) {
-      fetch(`/api/twitch/oauth?code=${code}`)
+      fetch(`/api/twitch/oauth?code=${code}&user_id=${id}`)
         .then((res) => res.json())
         .then((data) => {
-          setTokenData(data);
-          fetchStreamTitle(data.access_token);
+          console.log('Token data:', data);
+          fetchStreamTitle();
         })
         .catch(() => {
           setError('Failed to retrieve token');
@@ -50,11 +50,13 @@ export function ClientComponent({ id }: { id: string }) {
   }, [searchParams]);
 
   // Function to fetch the current stream title
-  const fetchStreamTitle = (accessToken: string) => {
+  const fetchStreamTitle = async () => {
+    const cookie = await fetch('/api/twitch/qwe').then((res) => res.json())
+    console.log(cookie.value)
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${cookie.value}`,
         'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
       },
     })
