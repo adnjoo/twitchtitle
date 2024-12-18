@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { PreviousTitles } from '@/src/components/PreviousTitles';
@@ -17,6 +17,7 @@ export function ClientComponent({
 }: ClientComponentProps) {
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const router = useRouter();
 
   const [error, setError] = useState<any>(null);
   const [streamTitle, setStreamTitle] = useState<string>('');
@@ -43,6 +44,7 @@ export function ClientComponent({
   useEffect(() => {
     if (twitchAccessToken) {
       fetchStreamTitle(twitchAccessToken);
+      fetchPreviousTitles();
     }
   }, [twitchAccessToken]);
 
@@ -53,14 +55,12 @@ export function ClientComponent({
       fetch(`/api/twitch/oauth?code=${code}&userId=${id}`)
         .then((res) => res.json())
         .then((data) => {
-          console.log('Token data:', data);
-          fetchStreamTitle(data.access_token);
+          router.push('/'); // Redirect to home page
         })
         .catch(() => {
           setError('Failed to retrieve token');
         });
     }
-    fetchPreviousTitles(); // Fetch titles on component load
   }, [searchParams]);
 
   // Function to fetch the current stream title
