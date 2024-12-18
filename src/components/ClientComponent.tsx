@@ -90,43 +90,23 @@ export function ClientComponent({
       return;
     }
 
-    fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
+    fetch('/api/twitch/update-stream-title', {
       method: 'PATCH',
       headers: {
-        Authorization: `Bearer ${twitchAccessToken}`,
-        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ title: streamTitle }),
+      body: JSON.stringify({
+        broadcaster_id: id,
+        access_token: twitchAccessToken,
+        title: streamTitle,
+      }),
     })
-      .then(async () => {
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error('Failed to update stream title');
+        }
         setUpdateMessage('Stream title successfully updated!');
         fetchStreamTitle(); // Refresh current title
-
-        // Check for duplicates before inserting into Supabase
-        const { data: existingTitles, error: fetchError } = await supabase
-          .from('stream_titles')
-          .select('title')
-          .eq('user_id', id)
-          .eq('title', streamTitle);
-
-        if (fetchError) {
-          console.error('Error checking for duplicates:', fetchError);
-          setError('Failed to validate duplicate titles');
-          return;
-        }
-
-        if (existingTitles && existingTitles.length > 0) {
-          return;
-        }
-
-        // Save to Supabase if no duplicates
-        const { error } = await supabase.from('stream_titles').insert([
-          {
-            user_id: id,
-            title: streamTitle,
-          },
-        ]);
 
         if (!error) {
           fetchPreviousTitles(); // Refresh previous titles
@@ -135,7 +115,8 @@ export function ClientComponent({
           setError('Failed to save title');
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error updating stream title:', error);
         setUpdateMessage('Failed to update stream title');
       });
   };
