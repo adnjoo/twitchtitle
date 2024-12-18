@@ -41,9 +41,30 @@ export function ClientComponent({
     }
   };
 
+  // Fetch the current stream title from the API route
+  const fetchStreamTitle = async () => {
+    if (!twitchAccessToken) return;
+
+    try {
+      const response = await fetch(
+        `/api/twitch/get-stream-title?broadcaster_id=${id}&access_token=${twitchAccessToken}`
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch stream title');
+      }
+
+      setCurrentTitle(data.title || 'No title found');
+    } catch (error) {
+      console.error('Error fetching stream title:', error);
+      setError('Failed to fetch current stream title');
+    }
+  };
+
   useEffect(() => {
     if (twitchAccessToken) {
-      fetchStreamTitle(twitchAccessToken);
+      fetchStreamTitle();
       fetchPreviousTitles();
     }
   }, [twitchAccessToken]);
@@ -63,25 +84,6 @@ export function ClientComponent({
     }
   }, [searchParams]);
 
-  // Function to fetch the current stream title
-  const fetchStreamTitle = (accessToken: string) => {
-    fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const title = data?.data?.[0]?.title || 'No title found';
-        setCurrentTitle(title);
-      })
-      .catch(() => {
-        setError('Failed to fetch current stream title');
-      });
-  };
-
   const updateStreamTitle = () => {
     if (!twitchAccessToken || !streamTitle) {
       setUpdateMessage('Missing access token or stream title');
@@ -99,7 +101,7 @@ export function ClientComponent({
     })
       .then(async () => {
         setUpdateMessage('Stream title successfully updated!');
-        fetchStreamTitle(twitchAccessToken); // Refresh current title
+        fetchStreamTitle(); // Refresh current title
 
         // Check for duplicates before inserting into Supabase
         const { data: existingTitles, error: fetchError } = await supabase
@@ -115,7 +117,6 @@ export function ClientComponent({
         }
 
         if (existingTitles && existingTitles.length > 0) {
-          // setUpdateMessage("Title already exists. No duplicates allowed.");
           return;
         }
 
@@ -139,7 +140,6 @@ export function ClientComponent({
       });
   };
 
-  // Twitch OAuth URL
   const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
       ?response_type=code
       &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
