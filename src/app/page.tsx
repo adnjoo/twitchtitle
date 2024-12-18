@@ -56,7 +56,7 @@ export default async function Home() {
               <span className='text-purple-600'>{user.user_metadata.name}</span>
               !
             </h1>
-            <ClientComponent id={user?.user_metadata.sub} twitchAccessToken={twitch_access_token.value} />
+            <ClientComponent id={user?.user_metadata.sub} twitchAccessToken={twitch_access_token?.value} />
           </>
         )}
       </main>
