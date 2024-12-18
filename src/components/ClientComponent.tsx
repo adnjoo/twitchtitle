@@ -18,7 +18,6 @@ export function ClientComponent({
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  const [tokenData, setTokenData] = useState<any>(null);
   const [error, setError] = useState<any>(null);
   const [streamTitle, setStreamTitle] = useState<string>('');
   const [currentTitle, setCurrentTitle] = useState<string>('');
@@ -43,7 +42,6 @@ export function ClientComponent({
 
   useEffect(() => {
     if (twitchAccessToken) {
-      setTokenData({ access_token: twitchAccessToken });
       fetchStreamTitle(twitchAccessToken);
     }
   }, [twitchAccessToken]);
@@ -55,7 +53,7 @@ export function ClientComponent({
       fetch(`/api/twitch/oauth?code=${code}&userId=${id}`)
         .then((res) => res.json())
         .then((data) => {
-          setTokenData(data);
+          console.log('Token data:', data);
           fetchStreamTitle(data.access_token);
         })
         .catch(() => {
@@ -85,7 +83,7 @@ export function ClientComponent({
   };
 
   const updateStreamTitle = () => {
-    if (!tokenData?.access_token || !streamTitle) {
+    if (!twitchAccessToken || !streamTitle) {
       setUpdateMessage('Missing access token or stream title');
       return;
     }
@@ -93,7 +91,7 @@ export function ClientComponent({
     fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
       method: 'PATCH',
       headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
+        Authorization: `Bearer ${twitchAccessToken}`,
         'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
@@ -101,7 +99,7 @@ export function ClientComponent({
     })
       .then(async () => {
         setUpdateMessage('Stream title successfully updated!');
-        fetchStreamTitle(tokenData.access_token); // Refresh current title
+        fetchStreamTitle(twitchAccessToken); // Refresh current title
 
         // Check for duplicates before inserting into Supabase
         const { data: existingTitles, error: fetchError } = await supabase
@@ -154,7 +152,7 @@ export function ClientComponent({
 
       {error && <p className='text-red-500'>{error}</p>}
 
-      {tokenData ? (
+      {twitchAccessToken ? (
         <div className='rounded-lg bg-gray-100 p-4'>
           <p className='mt-2'>
             <strong>Current Stream Title:</strong>{' '}
