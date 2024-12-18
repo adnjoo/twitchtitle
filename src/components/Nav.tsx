@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { LogoutButton } from "./LogoutButton";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/src/utils/supabase/server";
 
 export default async function Navbar() {
   const supabase = await createClient();

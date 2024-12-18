@@ -1,6 +1,5 @@
-import Image from "next/image";
-import { createClient } from "@/utils/supabase/server";
-import { ClientComponent } from "../components/ClientComponent";
+import { createClient } from "@/src/utils/supabase/server";
+import { ClientComponent } from "@/src/components/ClientComponent";
 
 export default async function Home() {
   const supabase = await createClient();

@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/src/utils/supabase/client";
 
 export default function LoginPage() {
   // Function to sign in using Twitch OAuth

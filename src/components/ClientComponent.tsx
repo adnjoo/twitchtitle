@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/src/utils/supabase/client";
 
 export function ClientComponent({ id }: { id: string }) {
   const searchParams = useSearchParams();
@@ -162,7 +162,7 @@ export function ClientComponent({ id }: { id: string }) {
             <strong>Current Stream Title:</strong>{" "}
             {currentTitle || "Loading..."}
           </p>
-          <div className="mt-4">
+          <div className="flex flex-col mt-4 gap-4">
             <input
               type="text"
               placeholder="Enter new stream title"
