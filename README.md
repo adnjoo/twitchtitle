@@ -31,6 +31,8 @@ Automate and update your Twitch stream titles programmatically.
      TWITCH_CLIENT_SECRET=your_client_secret
      NEXT_PUBLIC_SUPABASE_URL=..
      NEXT_PUBLIC_SUPABASE_ANON_KEY=..
+
+     PUPPETEER_EXECUTABLE_PATH=..
      ```
 
 4. **Run the app**:
