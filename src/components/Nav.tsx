@@ -1,6 +1,9 @@
-import Image from "next/image";
-import { LogoutButton } from "./LogoutButton";
-import { createClient } from "@/src/utils/supabase/server";
+import Image from 'next/image';
+
+import { createClient } from '@/src/utils/supabase/server';
+
+import { LogoutButton } from './LogoutButton';
+import { MobileNav } from './MobileNav';
 
 export default async function Navbar() {
   const supabase = await createClient();
@@ -10,55 +13,36 @@ export default async function Navbar() {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="">
-      <div className="container mx-auto flex items-center justify-between px-4 py-3">
+    <nav className=''>
+      <div className='container mx-auto flex items-center justify-between px-4 py-3'>
         {/* Logo/Wordmark */}
-        <div className="flex items-center">
-          <a href="/">
+        <div className='flex items-center'>
+          <a href='/'>
             <Image
-              src="/logo.png"
-              alt="TwitchTitle logo"
-              width={180}
-              height={38}
+              src='/logo.png'
+              alt='TwitchTitle logo'
+              width={40}
+              height={40}
               priority
-              className="h-auto w-auto"
+              className='h-auto w-auto'
             />
           </a>
         </div>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex space-x-6">
+        <div className='hidden space-x-6 md:flex'>
           <div>
             {user ? (
               <LogoutButton />
             ) : (
-              <a href="/login" className="">
+              <a href='/login' className=''>
                 Login
               </a>
             )}
           </div>
         </div>
 
-        {/* Mobile Menu (Optional) */}
-        <div className="md:hidden">
-          <button className="text-gray-400 hover:text-white">
-            {/* Mobile Menu Icon */}
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </button>
-        </div>
+        <MobileNav />
       </div>
     </nav>
   );

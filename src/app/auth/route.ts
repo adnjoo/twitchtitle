@@ -1,7 +1,7 @@
 export async function GET() {
-  return new Response(JSON.stringify({ message: "Hello, world!" }), {
+  return new Response(JSON.stringify({ message: 'Hello, world!' }), {
     headers: {
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
   });
 }
