@@ -18,8 +18,8 @@ export default async function Navbar() {
             <Image
               src="/logo.png"
               alt="TwitchTitle logo"
-              width={180}
-              height={38}
+              width={40}
+              height={40}
               priority
               className="h-auto w-auto"
             />
