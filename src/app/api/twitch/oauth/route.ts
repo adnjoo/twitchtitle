@@ -1,8 +1,12 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { createClient } from '@/src/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code') as string;
+  const userId = searchParams.get('userId') as string;
 
   if (!code) {
     throw new Error('Missing code parameter');
@@ -29,13 +33,41 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
+    const { access_token, refresh_token, expires_in } = data;
+
+    // Convert Unix timestamp to ISO string
+    const expires_at = new Date(Date.now() + expires_in * 1000).toISOString();
+
     console.log('Token exchange response:', data);
-    // Respond with the access token data
-    return new Response(JSON.stringify(data), {
-      headers: {
-        'Content-Type': 'application/json',
+
+    // Save tokens to Supabase
+    const { error } = await supabase.from('user_tokens').upsert(
+      {
+        user_id: userId,
+        access_token,
+        refresh_token,
+        expires_at, // Store expiry as a timestamp
       },
+      { onConflict: 'user_id' }
+    );
+
+    if (error) {
+      console.error('Failed to save tokens in Supabase:', error);
+      return new NextResponse('Failed to save tokens', { status: 500 });
+    }
+
+    // Set access token as a secure HTTP-only cookie
+    const res = new NextResponse(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' },
     });
+
+    res.cookies.set('twitch_access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: expires_in,
+    });
+
+    return res;
   } catch (error) {
     console.error('Token exchange error:', error);
     return new Response('Token exchange error', {
