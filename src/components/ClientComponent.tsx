@@ -24,6 +24,9 @@ export function ClientComponent({
   const [currentTitle, setCurrentTitle] = useState<string>('');
   const [updateMessage, setUpdateMessage] = useState<string>('');
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [gameName, setGameName] = useState<string>('');
+  const [broadcasterName, setBroadcasterName] = useState<string>('');
 
   // Fetch previous titles from Supabase
   const fetchPreviousTitles = async () => {
@@ -41,9 +44,34 @@ export function ClientComponent({
     }
   };
 
+  // Fetch the current stream title and tags from the API route
+  const getChannels = async () => {
+    if (!twitchAccessToken) return;
+
+    try {
+      const response = await fetch(
+        `/api/twitch/channels?broadcaster_id=${id}&access_token=${twitchAccessToken}`
+      );
+      const data = await response.json();
+      console.log('data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch stream title');
+      }
+
+      setCurrentTitle(data.title || 'No title found');
+      setTags(data.tags || []);
+      setGameName(data.game_name || 'No game found');
+      setBroadcasterName(data.broadcaster_name || 'No broadcaster found');
+    } catch (error) {
+      console.error('Error fetching stream title:', error);
+      setError('Failed to fetch current stream title');
+    }
+  };
+
   useEffect(() => {
     if (twitchAccessToken) {
-      fetchStreamTitle(twitchAccessToken);
+      getChannels();
       fetchPreviousTitles();
     }
   }, [twitchAccessToken]);
@@ -63,69 +91,29 @@ export function ClientComponent({
     }
   }, [searchParams]);
 
-  // Function to fetch the current stream title
-  const fetchStreamTitle = (accessToken: string) => {
-    fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const title = data?.data?.[0]?.title || 'No title found';
-        setCurrentTitle(title);
-      })
-      .catch(() => {
-        setError('Failed to fetch current stream title');
-      });
-  };
-
   const updateStreamTitle = () => {
     if (!twitchAccessToken || !streamTitle) {
       setUpdateMessage('Missing access token or stream title');
       return;
     }
 
-    fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${id}`, {
+    fetch('/api/twitch/update-stream-title', {
       method: 'PATCH',
       headers: {
-        Authorization: `Bearer ${twitchAccessToken}`,
-        'Client-Id': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ title: streamTitle }),
+      body: JSON.stringify({
+        broadcaster_id: id,
+        access_token: twitchAccessToken,
+        title: streamTitle,
+      }),
     })
-      .then(async () => {
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error('Failed to update stream title');
+        }
         setUpdateMessage('Stream title successfully updated!');
-        fetchStreamTitle(twitchAccessToken); // Refresh current title
-
-        // Check for duplicates before inserting into Supabase
-        const { data: existingTitles, error: fetchError } = await supabase
-          .from('stream_titles')
-          .select('title')
-          .eq('user_id', id)
-          .eq('title', streamTitle);
-
-        if (fetchError) {
-          console.error('Error checking for duplicates:', fetchError);
-          setError('Failed to validate duplicate titles');
-          return;
-        }
-
-        if (existingTitles && existingTitles.length > 0) {
-          // setUpdateMessage("Title already exists. No duplicates allowed.");
-          return;
-        }
-
-        // Save to Supabase if no duplicates
-        const { error } = await supabase.from('stream_titles').insert([
-          {
-            user_id: id,
-            title: streamTitle,
-          },
-        ]);
+        getChannels(); // Refresh current title
 
         if (!error) {
           fetchPreviousTitles(); // Refresh previous titles
@@ -134,12 +122,12 @@ export function ClientComponent({
           setError('Failed to save title');
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error updating stream title:', error);
         setUpdateMessage('Failed to update stream title');
       });
   };
 
-  // Twitch OAuth URL
   const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize
       ?response_type=code
       &client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}
@@ -154,10 +142,26 @@ export function ClientComponent({
 
       {twitchAccessToken ? (
         <div className='rounded-lg bg-gray-100 p-4'>
-          <p className='mt-2'>
-            <strong>Current Stream Title:</strong>{' '}
+          <a
+            className='mt-2 underline'
+            target='_blank'
+            href={`https://twitch.com/${broadcasterName}`}
+          >
             {currentTitle || 'Loading...'}
-          </p>
+          </a>
+          <p>{gameName || 'Loading...'}</p>
+          <div className='mt-2'>
+            <strong>Tags:</strong>{' '}
+            {tags.length > 0 ? (
+              <ul className='list-disc pl-6'>
+                {tags.map((tag, index) => (
+                  <li key={index}>{tag}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No tags available</p>
+            )}
+          </div>
           <div className='mt-4 flex flex-col gap-4'>
             <input
               type='text'
@@ -176,7 +180,6 @@ export function ClientComponent({
           {updateMessage && (
             <p className='mt-2 text-green-600'>{updateMessage}</p>
           )}
-
           <PreviousTitles
             setStreamTitle={setStreamTitle}
             previousTitles={previousTitles}

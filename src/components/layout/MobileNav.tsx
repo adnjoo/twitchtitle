@@ -3,9 +3,8 @@
 import { LogIn, Menu } from 'lucide-react';
 import { useState } from 'react';
 
+import { LogoutButton } from '@/src/components/LogoutButton';
 import { useUser } from '@/src/utils/hooks/useUser';
-
-import { LogoutButton } from './LogoutButton';
 
 export const MobileNav = () => {
   const [open, setOpen] = useState(false);
