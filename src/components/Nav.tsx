@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { LogoutButton } from "./LogoutButton";
 import { createClient } from "@/src/utils/supabase/server";
+import { MobileNav } from "./MobileNav";
 
 export default async function Navbar() {
   const supabase = await createClient();
@@ -39,26 +40,7 @@ export default async function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu (Optional) */}
-        <div className="md:hidden">
-          <button className="text-gray-400 hover:text-white">
-            {/* Mobile Menu Icon */}
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </button>
-        </div>
+        <MobileNav />
       </div>
     </nav>
   );
