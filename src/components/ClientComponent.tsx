@@ -21,12 +21,14 @@ export function ClientComponent({
 
   const [error, setError] = useState<any>(null);
   const [streamTitle, setStreamTitle] = useState<string>('');
-  const [currentTitle, setCurrentTitle] = useState<string>('');
   const [updateMessage, setUpdateMessage] = useState<string>('');
   const [previousTitles, setPreviousTitles] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
-  const [gameName, setGameName] = useState<string>('');
-  const [broadcasterName, setBroadcasterName] = useState<string>('');
+  const [channelInfo, setChannelInfo] = useState({
+    currentTitle: '',
+    tags: [] as string[],
+    gameName: '',
+    broadcasterName: '',
+  });
 
   // Fetch previous titles from Supabase
   const fetchPreviousTitles = async () => {
@@ -59,10 +61,12 @@ export function ClientComponent({
         throw new Error(data.error || 'Failed to fetch stream title');
       }
 
-      setCurrentTitle(data.title || 'No title found');
-      setTags(data.tags || []);
-      setGameName(data.game_name || 'No game found');
-      setBroadcasterName(data.broadcaster_name || 'No broadcaster found');
+      setChannelInfo({
+        currentTitle: data.title || 'No title found',
+        tags: data.tags || [],
+        gameName: data.game_name || 'No game found',
+        broadcasterName: data.broadcaster_name || 'No broadcaster found',
+      });
     } catch (error) {
       console.error('Error fetching stream title:', error);
       setError('Failed to fetch current stream title');
@@ -142,19 +146,13 @@ export function ClientComponent({
 
       {twitchAccessToken ? (
         <div className='rounded-lg bg-gray-100 p-4'>
-          <a
-            className='mt-2 underline'
-            target='_blank'
-            href={`https://twitch.com/${broadcasterName}`}
-          >
-            {currentTitle || 'Loading...'}
-          </a>
-          <p>{gameName || 'Loading...'}</p>
+          <p>{channelInfo.currentTitle || 'Loading...'}</p>
+          <p>{channelInfo.gameName || 'Loading...'}</p>
           <div className='mt-2'>
             <strong>Tags:</strong>{' '}
-            {tags.length > 0 ? (
+            {channelInfo.tags.length > 0 ? (
               <ul className='list-disc pl-6'>
-                {tags.map((tag, index) => (
+                {channelInfo.tags.map((tag, index) => (
                   <li key={index}>{tag}</li>
                 ))}
               </ul>
