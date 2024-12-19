@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import puppeteer from 'puppeteer-core'; // Use puppeteer-core for better compatibility with hosting platforms.
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core'; // Use puppeteer-core for better compatibility with hosting platforms.
+// import puppeteer from 'puppeteer';
 
 // TODO: only works locally
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Launch Puppeteer
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: true,
+      headless: false,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     });
 
